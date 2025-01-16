@@ -35,10 +35,10 @@ public class InitData implements CommandLineRunner {
         pizzaRepository.save(new Pizza( "Vegetar", 80));
         pizzaRepository.save(new Pizza( "Meat Lover", 95));
 
-        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174001", DroneStatus.I_DRIFT, stationRepository.findById(1).orElse(null)));
-        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174002", DroneStatus.I_DRIFT, stationRepository.findById(2).orElse(null)));
-        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174003", DroneStatus.I_DRIFT, stationRepository.findById(1).orElse(null)));
-        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174004", DroneStatus.I_DRIFT, null));
+        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174001", DroneStatus.OPERATIONAL, stationRepository.findById(1).orElse(null)));
+        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174002", DroneStatus.OPERATIONAL, stationRepository.findById(2).orElse(null)));
+        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174003", DroneStatus.OPERATIONAL, stationRepository.findById(1).orElse(null)));
+        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174004", DroneStatus.OPERATIONAL, stationRepository.findById(3).orElse(null)));
         leveringsRepository.save(Levering.builder()
                 .adresse("Test Address 1")
                 .forventetLevering(LocalDateTime.now().plusMinutes(30))

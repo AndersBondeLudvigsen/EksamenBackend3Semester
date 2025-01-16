@@ -20,7 +20,7 @@ public class Drone {
     @Column(unique = true, nullable = false)
     private String serialUuid;
 
-    @Enumerated(EnumType.STRING) // Use EnumType.STRING to store the enum name in the database
+    @Enumerated(EnumType.STRING)
     private DroneStatus status;
     @ManyToOne
     @JoinColumn(name = "station_id")

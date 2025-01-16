@@ -21,25 +21,20 @@ public class DroneService {
     private final DroneRepository droneRepository;
     private final StationRepository stationRepository;
 
-    // Constructor injection
     public DroneService(DroneRepository droneRepository, StationRepository stationRepository) {
         this.droneRepository = droneRepository;
         this.stationRepository = stationRepository;
     }
 
-    // ------------------------------------------------------------------------
-    // DroneService Methods
-    // ------------------------------------------------------------------------
-
     public List<DroneResponseDTO> getAllDrones() {
         return droneRepository.findAll().stream()
-                .map(this::mapToDroneResponseDTO) // Reuse helper method
+                .map(this::mapToDroneResponseDTO)
                 .toList();
     }
 
     public DroneResponseDTO getDroneById(int id) {
         return droneRepository.findById(id)
-                .map(this::mapToDroneResponseDTO) // Reuse helper method
+                .map(this::mapToDroneResponseDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Drone with id " + id + " not found"));
     }
 
@@ -61,7 +56,7 @@ public class DroneService {
 
         Drone savedDrone = droneRepository.save(newDrone);
 
-        return mapToDroneResponseDTO(savedDrone); // Reuse helper method
+        return mapToDroneResponseDTO(savedDrone);
     }
 
 
@@ -73,18 +68,15 @@ public class DroneService {
         drone.setStatus(status);
         Drone updatedDrone = droneRepository.save(drone);
 
-        return mapToDroneResponseDTO(updatedDrone); // Reuse helper method
+        return mapToDroneResponseDTO(updatedDrone);
     }
 
-    // ------------------------------------------------------------------------
-    // Helper Methods for DTO Mapping
-    // ------------------------------------------------------------------------
 
     private DroneResponseDTO mapToDroneResponseDTO(Drone drone) {
         return new DroneResponseDTO(
                 drone.getSerialUuid(),
                 drone.getStatus(),
-                mapToStationDTO(drone.getStation()), // Reuse station mapping
+                mapToStationDTO(drone.getStation()),
                 drone.getDroneId()
         );
     }

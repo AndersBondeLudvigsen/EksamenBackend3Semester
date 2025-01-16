@@ -34,9 +34,6 @@ public class LeveringsService {
         this.stationRepository = stationRepository;
     }
 
-    // ------------------------------------------------------------------------
-    // Public Methods
-    // ------------------------------------------------------------------------
 
     public List<LeveringsResponseDTO> getAllPendingDeliveries() {
         return leveringRepository.findAllByFaktiskLeveringIsNull().stream()
@@ -77,7 +74,6 @@ public class LeveringsService {
 
         Drone drone = getAvailableDrone(droneId);
 
-        // Tjek om denne drone allerede er på en levering, der ikke er afsluttet
         if (leveringRepository.existsByDroneAndFaktiskLeveringIsNull(drone)) {
             throw new DroneAlreadyAssignedException("Drone is already assigned to another delivery");
         }
@@ -109,13 +105,13 @@ public class LeveringsService {
                         "Pizza with id " + requestDTO.pizzaId() + " not found"));
 
         Station station = stationRepository.findAll().stream()
-                .filter(s -> s.getDroner().stream().anyMatch(drone -> drone.getStatus() == DroneStatus.I_DRIFT))
+                .filter(s -> s.getDroner().stream().anyMatch(drone -> drone.getStatus() == DroneStatus.OPERATIONAL))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No station with available drones found"));
 
         Drone drone = station.getDroner().stream()
-                .filter(d -> d.getStatus() == DroneStatus.I_DRIFT)
+                .filter(d -> d.getStatus() == DroneStatus.OPERATIONAL)
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No available drones at station " + station.getStationId()));
@@ -132,9 +128,6 @@ public class LeveringsService {
         return mapToResponseDTO(savedLevering);
     }
 
-    // ------------------------------------------------------------------------
-    // Helper Methods for DTO Mapping and Logic
-    // ------------------------------------------------------------------------
 
     private LeveringsResponseDTO mapToResponseDTO(Levering levering) {
         return new LeveringsResponseDTO(
@@ -163,10 +156,7 @@ public class LeveringsService {
         return (drone != null) ? drone.getSerialUuid() : null;
     }
 
-    /**
-     * Returnerer en drone baseret på et droneId (hvis specificeret),
-     * eller en vilkårlig "I_DRIFT"-drone, der ikke er på en levering, hvis droneId er null.
-     */
+
     private Drone getAvailableDrone(Integer droneId) {
         if (droneId != null) {
             return droneRepository.findById(droneId)
@@ -175,7 +165,7 @@ public class LeveringsService {
         }
 
         return droneRepository.findAll().stream()
-                .filter(d -> d.getStatus() == DroneStatus.I_DRIFT)
+                .filter(d -> d.getStatus() == DroneStatus.OPERATIONAL)
                 .filter(d -> !leveringRepository.existsByDroneAndFaktiskLeveringIsNull(d))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("No available drones found"));

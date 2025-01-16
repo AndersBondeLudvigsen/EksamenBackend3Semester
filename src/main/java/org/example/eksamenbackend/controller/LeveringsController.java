@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:63342")
-
+@CrossOrigin
 @RequestMapping("/deliveries")
 public class LeveringsController {
 
@@ -45,14 +44,13 @@ public class LeveringsController {
     @PostMapping("/schedule/{leveringId}")
     public ResponseEntity<LeveringsResponseDTO> scheduleDelivery(
             @PathVariable int leveringId,
-            @RequestParam(required = false) Integer droneId // optional droneId
+            @RequestParam(required = false) Integer droneId
     ) {
         try {
             LeveringsResponseDTO scheduledDelivery = leveringsService.scheduleDelivery(leveringId, droneId);
             return new ResponseEntity<>(scheduledDelivery, HttpStatus.OK);
         } catch (RuntimeException e) {
-            // Optionally, you can return the error message if you like:
-            // return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

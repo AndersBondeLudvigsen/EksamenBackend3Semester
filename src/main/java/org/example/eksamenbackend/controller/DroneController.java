@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:63342")
+@CrossOrigin
 @RequestMapping("/drones")
 public class DroneController {
 
@@ -50,7 +50,7 @@ public class DroneController {
     @PostMapping("/enable/{id}")
     public ResponseEntity<DroneResponseDTO> enableDrone(@PathVariable int id) {
         try {
-            DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.I_DRIFT);
+            DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.OPERATIONAL);
             return new ResponseEntity<>(updatedDrone, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -60,7 +60,7 @@ public class DroneController {
     @PostMapping("/disable/{id}")
     public ResponseEntity<DroneResponseDTO> disableDrone(@PathVariable int id) {
         try {
-            DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.UDE_AF_DRIFT);
+            DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.OUT_OF_SERVICE );
             return new ResponseEntity<>(updatedDrone, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -70,7 +70,7 @@ public class DroneController {
     @PostMapping("/retire/{id}")
     public ResponseEntity<DroneResponseDTO> retireDrone(@PathVariable int id) {
         try {
-            DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.UDFASET);
+            DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.RETIRED);
             return new ResponseEntity<>(updatedDrone, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
