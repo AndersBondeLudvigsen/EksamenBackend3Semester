@@ -24,7 +24,7 @@ public class DroneService {
         this.droneRepository = droneRepository;
         this.stationRepository = stationRepository;
     }
-
+/*
     public List<DroneResponseDTO> getAllDrones() {
         return droneRepository.findAll().stream()
                 .map(drone -> {
@@ -43,6 +43,24 @@ public class DroneService {
                 })
                 .toList();
     }
+
+  */
+public List<DroneResponseDTO> getAllDrones() {
+    return droneRepository.findAll().stream()
+            .map(drone -> new DroneResponseDTO(
+                    drone.getSerialUuid(),
+                    drone.getStatus(),
+                    drone.getStation() != null
+                            ? new StationDTO(
+                            drone.getStation().getStationId(),
+                            drone.getStation().getLatitude(),
+                            drone.getStation().getLongitude()
+                    )
+                            : null,
+                    drone.getDroneId()
+            ))
+            .toList();
+}
 
     public DroneResponseDTO getDroneById(int id) {
         return droneRepository.findById(id)

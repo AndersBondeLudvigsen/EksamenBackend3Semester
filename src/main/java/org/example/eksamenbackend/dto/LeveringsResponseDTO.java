@@ -8,5 +8,7 @@ public record LeveringsResponseDTO(
     LocalDateTime forventetLevering,
     LocalDateTime faktiskLevering,
     String droneSerialUuid,
-    String pizzaName
+    String pizzaName,
+    StationDTO station
+
 ) {}

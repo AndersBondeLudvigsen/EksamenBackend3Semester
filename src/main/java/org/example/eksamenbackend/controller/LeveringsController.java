@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:63342")
+
 @RequestMapping("/deliveries")
 public class LeveringsController {
 
@@ -34,6 +36,7 @@ public class LeveringsController {
         }
     }
 
+
     @GetMapping("/queue")
     public List<LeveringsResponseDTO> getQueuedDeliveries() {
         return leveringsService.getQueuedDeliveries();
@@ -49,6 +52,7 @@ public class LeveringsController {
         }
     }
 
+
     @PutMapping("/finish/{leveringId}")
     public ResponseEntity<LeveringsResponseDTO> finishDelivery(@PathVariable int leveringId) {
         try {
@@ -58,4 +62,14 @@ public class LeveringsController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+    @PostMapping("/simulate/add")
+    public ResponseEntity<LeveringsResponseDTO> simulateAddDelivery(@RequestBody LeveringsRequestDTO requestDTO) {
+        try {
+            LeveringsResponseDTO newDelivery = leveringsService.simulateAddDelivery(requestDTO);
+            return new ResponseEntity<>(newDelivery, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
