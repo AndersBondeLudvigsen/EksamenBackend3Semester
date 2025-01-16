@@ -47,25 +47,6 @@ public class DroneController {
         }
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<DroneResponseDTO> updateDrone(@PathVariable int id, @RequestBody DroneRequestDTO droneRequestDTO) {
-        try {
-            DroneResponseDTO updatedDrone = droneService.updateDrone(id, droneRequestDTO);
-            return new ResponseEntity<>(updatedDrone, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDrone(@PathVariable int id) {
-        try {
-            droneService.deleteDrone(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
     @PostMapping("/enable/{id}")
     public ResponseEntity<DroneResponseDTO> enableDrone(@PathVariable int id) {
         try {

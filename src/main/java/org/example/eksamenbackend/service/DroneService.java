@@ -24,134 +24,45 @@ public class DroneService {
         this.droneRepository = droneRepository;
         this.stationRepository = stationRepository;
     }
-/*
+
+    // ------------------------------------------------------------------------
+    // DroneService Methods
+    // ------------------------------------------------------------------------
+
     public List<DroneResponseDTO> getAllDrones() {
         return droneRepository.findAll().stream()
-                .map(drone -> {
-                    Station station = drone.getStation();
-                    StationDTO stationDTO = new StationDTO(
-                            station.getStationId(),
-                            station.getLatitude(),
-                            station.getLongitude()
-                    );
-                    return new DroneResponseDTO(
-                            drone.getSerialUuid(),
-                            drone.getStatus(),
-                            stationDTO,
-                            drone.getDroneId()
-                    );
-                })
+                .map(this::mapToDroneResponseDTO) // Reuse helper method
                 .toList();
     }
 
-  */
-public List<DroneResponseDTO> getAllDrones() {
-    return droneRepository.findAll().stream()
-            .map(drone -> new DroneResponseDTO(
-                    drone.getSerialUuid(),
-                    drone.getStatus(),
-                    drone.getStation() != null
-                            ? new StationDTO(
-                            drone.getStation().getStationId(),
-                            drone.getStation().getLatitude(),
-                            drone.getStation().getLongitude()
-                    )
-                            : null,
-                    drone.getDroneId()
-            ))
-            .toList();
-}
-
     public DroneResponseDTO getDroneById(int id) {
         return droneRepository.findById(id)
-                .map(drone -> {
-                    Station station = drone.getStation();
-                    StationDTO stationDTO = new StationDTO(
-                            station.getStationId(),
-                            station.getLatitude(),
-                            station.getLongitude()
-                    );
-                    return new DroneResponseDTO(
-                            drone.getSerialUuid(),
-                            drone.getStatus(),
-                            stationDTO,
-                            drone.getDroneId()
-                    );
-                })
+                .map(this::mapToDroneResponseDTO) // Reuse helper method
                 .orElseThrow(() -> new RuntimeException("Drone with id " + id + " not found"));
     }
+
     public DroneResponseDTO addDrone(DroneRequestDTO requestDTO) {
-        // Retrieve all stations
         List<Station> stations = stationRepository.findAll();
         if (stations.isEmpty()) {
             throw new RuntimeException("No stations available to assign the drone.");
         }
 
-        // Find the station with the fewest drones
         Station stationWithFewestDrones = stations.stream()
                 .min(Comparator.comparingInt(station -> station.getDroner().size()))
                 .orElseThrow();
 
-        // Create a new Drone using the builder pattern
         Drone newDrone = Drone.builder()
                 .serialUuid(requestDTO.serialUuid())
                 .status(requestDTO.status())
                 .station(stationWithFewestDrones)
                 .build();
 
-        // Save the Drone to the repository
         Drone savedDrone = droneRepository.save(newDrone);
 
-        // Create a StationDTO for the response
-        StationDTO stationDTO = new StationDTO(
-                stationWithFewestDrones.getStationId(),
-                stationWithFewestDrones.getLatitude(),
-                stationWithFewestDrones.getLongitude()
-        );
-
-        // Return a DroneResponseDTO with the StationDTO
-        return new DroneResponseDTO(
-                savedDrone.getSerialUuid(),
-                savedDrone.getStatus(),
-                stationDTO,
-                savedDrone.getDroneId()
-        );
+        return mapToDroneResponseDTO(savedDrone); // Reuse helper method
     }
 
 
-
-    public DroneResponseDTO updateDrone(int id, DroneRequestDTO droneRequestDTO) {
-        Drone drone = droneRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Drone with id " + id + " not found"));
-
-        drone.setSerialUuid(droneRequestDTO.serialUuid());
-        drone.setStatus(droneRequestDTO.status());
-        drone.setStation(droneRequestDTO.station());
-
-        Drone updatedDrone = droneRepository.save(drone);
-
-        Station station = updatedDrone.getStation();
-        StationDTO stationDTO = new StationDTO(
-                station.getStationId(),
-                station.getLatitude(),
-                station.getLongitude()
-        );
-
-        return new DroneResponseDTO(
-                updatedDrone.getSerialUuid(),
-                updatedDrone.getStatus(),
-                stationDTO,
-                updatedDrone.getDroneId()
-        );
-    }
-
-
-    public void deleteDrone(int id) {
-        if (!droneRepository.existsById(id)) {
-            throw new RuntimeException("Drone with id " + id + " not found");
-        }
-        droneRepository.deleteById(id);
-    }
 
     public DroneResponseDTO changeDroneStatus(int id, DroneStatus status) {
         Drone drone = droneRepository.findById(id)
@@ -160,18 +71,30 @@ public List<DroneResponseDTO> getAllDrones() {
         drone.setStatus(status);
         Drone updatedDrone = droneRepository.save(drone);
 
-        Station station = updatedDrone.getStation();
-        StationDTO stationDTO = new StationDTO(
+        return mapToDroneResponseDTO(updatedDrone); // Reuse helper method
+    }
+
+    // ------------------------------------------------------------------------
+    // Helper Methods for DTO Mapping
+    // ------------------------------------------------------------------------
+
+    private DroneResponseDTO mapToDroneResponseDTO(Drone drone) {
+        return new DroneResponseDTO(
+                drone.getSerialUuid(),
+                drone.getStatus(),
+                mapToStationDTO(drone.getStation()), // Reuse station mapping
+                drone.getDroneId()
+        );
+    }
+
+    private StationDTO mapToStationDTO(Station station) {
+        if (station == null) {
+            return null;
+        }
+        return new StationDTO(
                 station.getStationId(),
                 station.getLatitude(),
                 station.getLongitude()
-        );
-
-        return new DroneResponseDTO(
-                updatedDrone.getSerialUuid(),
-                updatedDrone.getStatus(),
-                stationDTO,
-                updatedDrone.getDroneId()
         );
     }
 }

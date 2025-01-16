@@ -30,71 +30,54 @@ public class LeveringsService {
 
     public List<LeveringsResponseDTO> getAllPendingDeliveries() {
         return leveringRepository.findAllByFaktiskLeveringIsNull().stream()
-            .map(this::mapToResponseDTO)
-            .toList();
+                .map(this::mapToResponseDTO)
+                .toList();
     }
 
     public LeveringsResponseDTO addDelivery(LeveringsRequestDTO requestDTO) {
-        // Find the pizza
         Pizza pizza = pizzaRepository.findById(requestDTO.pizzaId())
                 .orElseThrow(() -> new RuntimeException("Pizza with id " + requestDTO.pizzaId() + " not found"));
 
-        // Create a new delivery without a drone
         Levering newLevering = Levering.builder()
                 .adresse(requestDTO.adresse())
                 .forventetLevering(LocalDateTime.now().plusMinutes(30))
                 .pizza(pizza)
                 .build();
 
-        // Save the new delivery
         Levering savedLevering = leveringRepository.save(newLevering);
 
         return mapToResponseDTO(savedLevering);
     }
 
-
     public List<LeveringsResponseDTO> getQueuedDeliveries() {
         return leveringRepository.findAllByDroneIsNull().stream()
-            .map(this::mapToResponseDTO)
-            .toList();
+                .map(this::mapToResponseDTO)
+                .toList();
     }
 
     public LeveringsResponseDTO scheduleDelivery(int leveringId, Integer droneId) {
-        // Find the levering
         Levering levering = leveringRepository.findById(leveringId)
                 .orElseThrow(() -> new RuntimeException("Levering with id " + leveringId + " not found"));
 
-        // Check if the levering already has a drone assigned
         if (levering.getDrone() != null) {
             throw new RuntimeException("Levering is already scheduled with a drone");
         }
 
-        // Find the drone (either specified or automatically selected)
-        Drone drone = (droneId != null)
-                ? droneRepository.findById(droneId)
-                .orElseThrow(() -> new RuntimeException("Drone with id " + droneId + " not found"))
-                : droneRepository.findAll().stream()
-                .filter(d -> d.getStatus() == DroneStatus.I_DRIFT)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No available drones found"));
+        Drone drone = getAvailableDrone(droneId);
 
-        // Ensure the drone is in "I_DRIFT" status
-        if (drone.getStatus() != DroneStatus.I_DRIFT) {
-            throw new RuntimeException("Drone is not in 'I_DRIFT' status");
+        if (leveringRepository.existsByDroneAndFaktiskLeveringIsNull(drone)) {
+            throw new RuntimeException("Drone is already assigned to another delivery");
         }
 
-        // Assign the drone to the levering
         levering.setDrone(drone);
         Levering updatedLevering = leveringRepository.save(levering);
 
-        // Map to response DTO and return
         return mapToResponseDTO(updatedLevering);
     }
 
-
     public LeveringsResponseDTO finishDelivery(int leveringId) {
         Levering levering = leveringRepository.findById(leveringId)
-            .orElseThrow(() -> new RuntimeException("Levering with id " + leveringId + " not found"));
+                .orElseThrow(() -> new RuntimeException("Levering with id " + leveringId + " not found"));
 
         if (levering.getDrone() == null) {
             throw new RuntimeException("Cannot finish a levering without a drone");
@@ -105,23 +88,6 @@ public class LeveringsService {
         return mapToResponseDTO(finishedLevering);
     }
 
-    private LeveringsResponseDTO mapToResponseDTO(Levering levering) {
-        return new LeveringsResponseDTO(
-                levering.getLeveringId(),
-                levering.getAdresse(),
-                levering.getForventetLevering(),
-                levering.getFaktiskLevering(),
-                levering.getDrone() != null ? levering.getDrone().getSerialUuid() : null,
-                levering.getPizza().getTitel(),
-                levering.getDrone() != null && levering.getDrone().getStation() != null
-                        ? new StationDTO(
-                        levering.getDrone().getStation().getStationId(),
-                        levering.getDrone().getStation().getLatitude(),
-                        levering.getDrone().getStation().getLongitude()
-                )
-                        : null
-        );
-    }
     public LeveringsResponseDTO simulateAddDelivery(LeveringsRequestDTO requestDTO) {
         Pizza pizza = pizzaRepository.findById(requestDTO.pizzaId())
                 .orElseThrow(() -> new RuntimeException("Pizza with id " + requestDTO.pizzaId() + " not found"));
@@ -148,5 +114,46 @@ public class LeveringsService {
         return mapToResponseDTO(savedLevering);
     }
 
+    // ------------------------------------------------------------------------
+    // Helper Methods for DTO Mapping and Logic
+    // ------------------------------------------------------------------------
 
+    private LeveringsResponseDTO mapToResponseDTO(Levering levering) {
+        return new LeveringsResponseDTO(
+                levering.getLeveringId(),
+                levering.getAdresse(),
+                levering.getForventetLevering(),
+                levering.getFaktiskLevering(),
+                getDroneSerialUuid(levering.getDrone()),
+                levering.getPizza().getTitel(),
+                mapToStationDTO(levering.getDrone())
+        );
+    }
+
+    private StationDTO mapToStationDTO(Drone drone) {
+        if (drone == null || drone.getStation() == null) {
+            return null;
+        }
+        return new StationDTO(
+                drone.getStation().getStationId(),
+                drone.getStation().getLatitude(),
+                drone.getStation().getLongitude()
+        );
+    }
+
+    private String getDroneSerialUuid(Drone drone) {
+        return drone != null ? drone.getSerialUuid() : null;
+    }
+
+    private Drone getAvailableDrone(Integer droneId) {
+        if (droneId != null) {
+            return droneRepository.findById(droneId)
+                    .orElseThrow(() -> new RuntimeException("Drone with id " + droneId + " not found"));
+        }
+        return droneRepository.findAll().stream()
+                .filter(d -> d.getStatus() == DroneStatus.I_DRIFT)
+                .filter(d -> !leveringRepository.existsByDroneAndFaktiskLeveringIsNull(d))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No available drones found"));
+    }
 }
