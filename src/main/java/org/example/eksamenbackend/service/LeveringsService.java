@@ -35,23 +35,18 @@ public class LeveringsService {
     }
 
     public LeveringsResponseDTO addDelivery(LeveringsRequestDTO requestDTO) {
+        // Find the pizza
         Pizza pizza = pizzaRepository.findById(requestDTO.pizzaId())
                 .orElseThrow(() -> new RuntimeException("Pizza with id " + requestDTO.pizzaId() + " not found"));
 
-        Drone drone = droneRepository.findById(requestDTO.droneId())
-                .orElseThrow(() -> new RuntimeException("Drone with id " + requestDTO.droneId() + " not found"));
-
-        if (drone.getStatus() != DroneStatus.I_DRIFT) {
-            throw new RuntimeException("Drone is not in 'I_DRIFT' status");
-        }
-
+        // Create a new delivery without a drone
         Levering newLevering = Levering.builder()
                 .adresse(requestDTO.adresse())
                 .forventetLevering(LocalDateTime.now().plusMinutes(30))
                 .pizza(pizza)
-                .drone(drone)
                 .build();
 
+        // Save the new delivery
         Levering savedLevering = leveringRepository.save(newLevering);
 
         return mapToResponseDTO(savedLevering);
