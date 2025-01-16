@@ -47,7 +47,7 @@ class LeveringsServiceTest {
 
         drone = Drone.builder()
                 .serialUuid("DRONE123")
-                .status(DroneStatus.I_DRIFT)
+                .status(DroneStatus.OPERATIONAL)
                 .build();
 
 
