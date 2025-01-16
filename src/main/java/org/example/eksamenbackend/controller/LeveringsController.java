@@ -42,7 +42,7 @@ public class LeveringsController {
         return leveringsService.getQueuedDeliveries();
     }
 
-    @PutMapping("/schedule/{leveringId}")
+    @PostMapping("/schedule/{leveringId}")
     public ResponseEntity<LeveringsResponseDTO> scheduleDelivery(@PathVariable int leveringId, @RequestParam(required = false) Integer droneId) {
         try {
             LeveringsResponseDTO scheduledDelivery = leveringsService.scheduleDelivery(leveringId, droneId);
@@ -53,7 +53,7 @@ public class LeveringsController {
     }
 
 
-    @PutMapping("/finish/{leveringId}")
+    @PostMapping("/finish/{leveringId}")
     public ResponseEntity<LeveringsResponseDTO> finishDelivery(@PathVariable int leveringId) {
         try {
             LeveringsResponseDTO finishedDelivery = leveringsService.finishDelivery(leveringId);

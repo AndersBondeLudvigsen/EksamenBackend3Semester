@@ -47,7 +47,7 @@ public class DroneController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     public ResponseEntity<DroneResponseDTO> updateDrone(@PathVariable int id, @RequestBody DroneRequestDTO droneRequestDTO) {
         try {
             DroneResponseDTO updatedDrone = droneService.updateDrone(id, droneRequestDTO);
@@ -66,7 +66,7 @@ public class DroneController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    @PutMapping("/enable/{id}")
+    @PostMapping("/enable/{id}")
     public ResponseEntity<DroneResponseDTO> enableDrone(@PathVariable int id) {
         try {
             DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.I_DRIFT);
@@ -76,7 +76,7 @@ public class DroneController {
         }
     }
 
-    @PutMapping("/disable/{id}")
+    @PostMapping("/disable/{id}")
     public ResponseEntity<DroneResponseDTO> disableDrone(@PathVariable int id) {
         try {
             DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.UDE_AF_DRIFT);
@@ -86,7 +86,7 @@ public class DroneController {
         }
     }
 
-    @PutMapping("/retire/{id}")
+    @PostMapping("/retire/{id}")
     public ResponseEntity<DroneResponseDTO> retireDrone(@PathVariable int id) {
         try {
             DroneResponseDTO updatedDrone = droneService.changeDroneStatus(id, DroneStatus.UDFASET);
