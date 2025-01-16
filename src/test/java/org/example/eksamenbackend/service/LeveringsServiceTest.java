@@ -100,4 +100,6 @@ class LeveringsServiceTest {
         LeveringsResponseDTO responseDTO = leveringsService.finishDelivery(1);
         assertNotNull(responseDTO.faktiskLevering());
     }
+
+
 }

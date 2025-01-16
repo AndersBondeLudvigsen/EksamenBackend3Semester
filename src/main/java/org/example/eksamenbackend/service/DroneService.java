@@ -3,6 +3,8 @@ package org.example.eksamenbackend.service;
 import org.example.eksamenbackend.dto.DroneRequestDTO;
 import org.example.eksamenbackend.dto.DroneResponseDTO;
 import org.example.eksamenbackend.dto.StationDTO;
+import org.example.eksamenbackend.exception.InvalidOperationException;
+import org.example.eksamenbackend.exception.ResourceNotFoundException;
 import org.example.eksamenbackend.model.Drone;
 import org.example.eksamenbackend.model.DroneStatus;
 import org.example.eksamenbackend.model.Station;
@@ -38,13 +40,13 @@ public class DroneService {
     public DroneResponseDTO getDroneById(int id) {
         return droneRepository.findById(id)
                 .map(this::mapToDroneResponseDTO) // Reuse helper method
-                .orElseThrow(() -> new RuntimeException("Drone with id " + id + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Drone with id " + id + " not found"));
     }
 
     public DroneResponseDTO addDrone(DroneRequestDTO requestDTO) {
         List<Station> stations = stationRepository.findAll();
         if (stations.isEmpty()) {
-            throw new RuntimeException("No stations available to assign the drone.");
+            throw new InvalidOperationException("No stations available to assign the drone.");
         }
 
         Station stationWithFewestDrones = stations.stream()
@@ -66,7 +68,7 @@ public class DroneService {
 
     public DroneResponseDTO changeDroneStatus(int id, DroneStatus status) {
         Drone drone = droneRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Drone with id " + id + " not found"));
+                .orElseThrow(() -> new InvalidOperationException("Drone with id " + id + " not found"));
 
         drone.setStatus(status);
         Drone updatedDrone = droneRepository.save(drone);

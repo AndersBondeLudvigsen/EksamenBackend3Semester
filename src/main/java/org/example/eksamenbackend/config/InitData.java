@@ -37,13 +37,13 @@ public class InitData implements CommandLineRunner {
 
         droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174001", DroneStatus.I_DRIFT, stationRepository.findById(1).orElse(null)));
         droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174002", DroneStatus.I_DRIFT, stationRepository.findById(2).orElse(null)));
-        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174003", DroneStatus.UDE_AF_DRIFT, stationRepository.findById(1).orElse(null)));
-        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174004", DroneStatus.UDFASET, null));
+        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174003", DroneStatus.I_DRIFT, stationRepository.findById(1).orElse(null)));
+        droneRepository.save(new Drone("123e4567-e89b-12d3-a456-426614174004", DroneStatus.I_DRIFT, null));
         leveringsRepository.save(Levering.builder()
                 .adresse("Test Address 1")
                 .forventetLevering(LocalDateTime.now().plusMinutes(30))
                 .faktiskLevering(null)
-                .drone(droneRepository.findById(1).orElse(null))
+                .drone(droneRepository.findById(2).orElse(null))
                 .pizza(pizzaRepository.findById(1).orElseThrow(() -> new RuntimeException("Pizza not found")))
                 .build());
 
@@ -52,14 +52,14 @@ public class InitData implements CommandLineRunner {
                 .forventetLevering(LocalDateTime.now().plusMinutes(45))
                 .faktiskLevering(null)
                 .drone(null)
-                .pizza(pizzaRepository.findById(2).orElseThrow(() -> new RuntimeException("Pizza not found")))
+                .pizza(pizzaRepository.findById(3).orElseThrow(() -> new RuntimeException("Pizza not found")))
                 .build());
 
         leveringsRepository.save(Levering.builder()
                 .adresse("Test Address 3")
                 .forventetLevering(LocalDateTime.now().plusMinutes(30))
                 .faktiskLevering(null)
-                .drone(droneRepository.findById(2).orElse(null))
+                .drone(droneRepository.findById(3).orElse(null))
                 .pizza(pizzaRepository.findById(3).orElseThrow(() -> new RuntimeException("Pizza not found")))
                 .build());
 
